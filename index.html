@@ -7,10 +7,9 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>MatBot</h1>
-    <textarea id="message" placeholder="Vad vill du säga?"></textarea>
-    
+  <main class="container">
+    <h1>📣 MatBot</h1>
+
     <div class="time-options" id="timeOptions">
       <button data-time="Nu">Nu</button>
       <button data-time="Om 5 minuter">Om 5 minuter</button>
@@ -18,10 +17,13 @@
       <button data-time="Efter maten">Efter maten</button>
       <button data-time="Senare">Senare</button>
     </div>
-    
+
+    <textarea id="message" placeholder="Skriv ett meddelande..."></textarea>
+
     <button id="sendButton">Skicka</button>
+
     <p id="status"></p>
-  </div>
+  </main>
 
   <script src="main.js"></script>
 </body>
