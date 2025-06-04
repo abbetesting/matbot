@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  background: #f0f0f0;
+  background: #c0d4ff;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -14,7 +14,7 @@ body {
   width: 100%;
   max-width: 500px;
   padding: 2rem 1.5rem;
-  background: #f0f0f0; /* samma som body för att smälta ihop */
+  background: #c0d4ff; /* samma som body för att smälta ihop */
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -40,7 +40,7 @@ h1 {
   padding: 0.6rem 1rem;
   border: 2px solid #ccc;
   border-radius: 8px;
-  background-color: #ffffff;
+  background-color: #55a4ff;
   color: #333;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -75,7 +75,7 @@ textarea {
   width: 100%;
   padding: 1.2rem;
   font-size: 1.1rem;
-  background-color: #28a745;
+  background-color: #3b45d1;
   color: white;
   border: none;
   border-radius: 8px;
