@@ -8,23 +8,42 @@
 </head>
 <body>
   <main class="container">
-    <h1>Skicka medelande till albin</h1>
 
-    <div class="time-options" id="timeOptions">
-      <button data-time="Nu">Nu</button>
-      <button data-time="Om 5 minuter">Om 5 minuter</button> 
-     <button data-time="Om 10 minuter">Om 10 minuter</button>
-      <button data-time="Efter matchen">Efter matchen</button>
-     
-    </div>
+    <!-- 🔐 PIN-login -->
+    <section id="loginScreen">
+      <h1> Ange kod</h1>
+      <div id="pinDisplay">••••</div>
+      <div class="keypad">
+        <button>1</button><button>2</button><button>3</button>
+        <button>4</button><button>5</button><button>6</button>
+        <button>7</button><button>8</button><button>9</button>
+        <button>⌫</button><button>0</button><button>✔️</button>
+      </div>
+      <p id="loginStatus"></p>
+      <button id="forgotCode" class="forgot-button">Glömt kod?</button>
+      <p id="forgotText" class="forgot-text" style="display: none;">Kontakta Albin för att få din kod.</p>
+    </section>
 
-    <textarea id="message" placeholder="Skriv ett meddelande..."></textarea>
+    <!-- 📨 Meddelandeformulär -->
+   <section id="messageScreen" style="display: none;">
+  <p id="loggedInAs" class="logged-in-text"></p>
+  <h1>Skicka meddelande till Albin</h1>
+  
+      <div class="time-options" id="timeOptions">
+        <button data-time="Nu">Nu</button>
+        <button data-time="Om 5 minuter">Om 5 minuter</button>
+        <button data-time="Om 10 minuter">Om 10 minuter</button>
+       
+        <button data-time="Efter rundan">Efter rundan</button>
+      </div>
 
-    <button id="sendButton">Skicka</button>
+      <textarea id="message" placeholder="Skriv ett meddelande..."></textarea>
+      <button id="sendButton">Skicka</button>
+      <p id="status"></p>
+      <button id="logoutButton" class="logout-button">Logga ut</button>
+    </section>
 
-    <p id="status"></p>
   </main>
-
   <script src="main.js"></script>
 </body>
 </html>
