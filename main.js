@@ -6,7 +6,7 @@ const users = {
 };
 
 // 🔗 Din Discord-webhook här:
-const webhookURL = "https://discord.com/api/webhooks/XXX/YYY"; // <-- Byt ut
+const webhookURL = "https://discord.com/api/webhooks/XXX/YYYhttps://discord.com/api/webhooks/1379859552631128155/bD4gyUslyJqTZ7j_XyqjGw1B0tRWQ_xcSdJ9aJSn1qgI9SbABx1VtPehtQpCAIj9jMlT"; // <-- Byt ut
 
 // 👉 Variabler för login
 let enteredPIN = "";
