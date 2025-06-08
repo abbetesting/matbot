@@ -39,11 +39,11 @@ app.post('/send', async (req, res) => {
 
       console.log(`📨 Svar från webhook: ${response.status}`);
 
-      if (response.status === 429) {
-        console.warn('⚠️ Rate limited – försöker nästa webhook...');
-        continue; // testa nästa
-      }
-
+     if (response.status === 429) {
+  const retryAfter = response.headers.get('retry-after');
+  console.warn(`⏳ Discord säger vänta ${retryAfter} sekunder`);
+  continue;
+}
       if (!response.ok) throw new Error(`❌ Discord svarade med ${response.status}`);
 
       sent = true;
