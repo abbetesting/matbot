@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('node-fetch'); // v2!
+const fetch = require('node-fetch'); // Använd version 2!
 const cors = require('cors');
 require('dotenv').config();
 
@@ -7,22 +7,27 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Lägg till flera webhooks i en array
+// ✅ Lista på flera webhooks (lägg till fler om du vill)
 const webhooks = [
   process.env.DISCORD_WEBHOOK_URL_1,
-  process.env.DISCORD_WEBHOOK_URL_2
+  process.env.DISCORD_WEBHOOK_URL_2,
 ];
 
 app.post('/send', async (req, res) => {
   const { content } = req.body;
 
   if (!content) {
-    return res.status(400).json({ error: 'Inget meddelande angivet.' });
+    return res.status(400).json({ error: '⚠️ Inget meddelande angivet.' });
   }
 
   let sent = false;
 
   for (const url of webhooks) {
+    if (!url) {
+      console.warn('⚠️ Skippade tom webhook.');
+      continue;
+    }
+
     try {
       console.log("🔧 Försöker skicka till:", url);
 
@@ -32,15 +37,17 @@ app.post('/send', async (req, res) => {
         body: JSON.stringify({ content }),
       });
 
+      console.log(`📨 Svar från webhook: ${response.status}`);
+
       if (response.status === 429) {
-        console.warn('⚠️ Rate limited på denna webhook, försöker nästa...');
-        continue; // testa nästa webhook
+        console.warn('⚠️ Rate limited – försöker nästa webhook...');
+        continue; // testa nästa
       }
 
-      if (!response.ok) throw new Error(`Status: ${response.status}`);
+      if (!response.ok) throw new Error(`❌ Discord svarade med ${response.status}`);
 
       sent = true;
-      break; // Skickat, avbryt loopen
+      break;
     } catch (err) {
       console.error('❌ Fel med webhook:', err.message);
     }
@@ -55,5 +62,5 @@ app.post('/send', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Kör på port ${PORT}`);
+  console.log(`🚀 Server kör på port ${PORT}`);
 });
