@@ -84,7 +84,7 @@ document.getElementById('sendButton').addEventListener('click', async () => {
   }
 
   const fullMessage = `${message}, ${selectedTime}, ${currentUser}`;
-
+console.log("🔧 Använder webhook:", process.env.DISCORD_WEBHOOK_URL);
   try {
     const res = await fetch(webhookURL, {
       method: "POST",
