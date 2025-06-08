@@ -6,7 +6,7 @@ const users = {
 };
 
 // 🔗 Din Discord-webhook här:
-const webhookURL = "https://matbot-vdla.onrender.com/send";
+const webhookURL = "https://matbot-1.onrender.com/send";
 // 👉 Variabler för login
 let enteredPIN = "";
 let currentUser = null;
