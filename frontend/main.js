@@ -1,15 +1,13 @@
-// 🔐 Lista över giltiga PIN-koder
+// 🔐 Giltiga användare
 const users = {
   "1234": "Mamma",
   "5678": "Pappa",
-  "2468": "Albin"
+  "2468": "Albin",
+  "1111": "Jobbarkompisen",
+  "2222": "Son till jobbarkompis"
 };
 
-// 🔗 Din Discord-webhook här:
 const webhookURL = "https://matbot-1.onrender.com/send";
-// 👉 Variabler för login
-let enteredPIN = "";
-let currentUser = null;
 
 // 👉 Element
 const pinDisplay = document.getElementById("pinDisplay");
@@ -17,8 +15,42 @@ const loginStatus = document.getElementById("loginStatus");
 const loginScreen = document.getElementById("loginScreen");
 const messageScreen = document.getElementById("messageScreen");
 const loggedInAs = document.getElementById("loggedInAs");
+const forgotText = document.getElementById("forgotText");
+const messageInput = document.getElementById("message");
+const sendButton = document.getElementById("sendButton");
+const status = document.getElementById("status");
+const logoutButton = document.getElementById("logoutButton");
 
-// 🔢 När man trycker på PIN-knapparna
+// 🍪 Cookie-hantering
+function setCookie(name, value, days) {
+  const expires = new Date(Date.now() + days * 86400000).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
+function getCookie(name) {
+  const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? decodeURIComponent(match.pop()) : null;
+}
+function deleteCookie(name) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+}
+
+// 👉 Inloggningsvariabler
+let enteredPIN = "";
+let currentUser = null;
+let selectedTime = null;
+
+// 🟢 Automatisk inloggning via cookie
+document.addEventListener("DOMContentLoaded", () => {
+  const savedUser = getCookie("matbotUser");
+  if (savedUser) {
+    currentUser = savedUser;
+    loginScreen.style.display = "none";
+    messageScreen.style.display = "flex";
+    loggedInAs.textContent = `Inloggad som: ${currentUser}`;
+  }
+});
+
+// 🔢 PIN-inmatning
 document.querySelectorAll(".keypad button").forEach(btn => {
   btn.addEventListener("click", () => {
     const val = btn.textContent;
@@ -28,6 +60,7 @@ document.querySelectorAll(".keypad button").forEach(btn => {
     } else if (val === "✔️") {
       if (users[enteredPIN]) {
         currentUser = users[enteredPIN];
+        setCookie("matbotUser", currentUser, 30); // 🍪 Spara i 30 dagar
         loginScreen.style.display = "none";
         messageScreen.style.display = "flex";
         loggedInAs.textContent = `Inloggad som: ${currentUser}`;
@@ -39,33 +72,11 @@ document.querySelectorAll(".keypad button").forEach(btn => {
       enteredPIN += val;
     }
 
-    // Visa PIN med siffror
     pinDisplay.textContent = enteredPIN.padEnd(4, "_");
   });
 });
 
-document.getElementById("forgotCode").addEventListener("click", () => {
-  const text = document.getElementById("forgotText");
-  text.style.display = "block";
-});
-
-document.getElementById("logoutButton").addEventListener("click", () => {
-  currentUser = null;
-  enteredPIN = "";
-  pinDisplay.textContent = "____";
-  loginStatus.textContent = "";
-  document.getElementById("message").value = "";
-  document.getElementById("status").textContent = "";
-  document.getElementById("forgotText").style.display = "none";
-  document.querySelectorAll(".time-options button").forEach(b => b.classList.remove("selected"));
-
-  // Visa login, dölj meddelande
-  loginScreen.style.display = "flex";
-  messageScreen.style.display = "none";
-});
-// 📤 Meddelandesidan
-let selectedTime = null;
-
+// ⏰ Välj tid
 document.querySelectorAll('.time-options button').forEach(btn => {
   btn.addEventListener('click', () => {
     selectedTime = btn.getAttribute('data-time');
@@ -74,9 +85,9 @@ document.querySelectorAll('.time-options button').forEach(btn => {
   });
 });
 
-document.getElementById('sendButton').addEventListener('click', async () => {
-  const message = document.getElementById('message').value.trim();
-  const status = document.getElementById('status');
+// 📤 Skicka meddelande
+sendButton.addEventListener('click', async () => {
+  const message = messageInput.value.trim();
 
   if (!message || !selectedTime || !currentUser) {
     status.textContent = "⚠️ Fyll i meddelande och välj tid.";
@@ -84,23 +95,55 @@ document.getElementById('sendButton').addEventListener('click', async () => {
   }
 
   const fullMessage = `${message}, ${selectedTime}, ${currentUser}`;
-console.log("🔧 Skickar till:", webhookURL); // ✅
+  console.log("🔧 Skickar till:", webhookURL);
+
   try {
+    sendButton.disabled = true;
+    status.textContent = "⏳ Skickar...";
+
     const res = await fetch(webhookURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: fullMessage }),
     });
 
-    if (res.ok) {
+    if (res.status === 429) {
+      const result = await res.json();
+      status.textContent = result.error || "🚫 Discord rate limit.";
+    } else if (res.ok) {
       status.textContent = "✅ Meddelande skickat!";
-      document.getElementById('message').value = "";
+      messageInput.value = "";
       selectedTime = null;
       document.querySelectorAll('.time-options button').forEach(b => b.classList.remove('selected'));
     } else {
       status.textContent = "❌ Fel vid skickande.";
     }
   } catch (err) {
-    status.textContent = "❌ Kunde inte kontakta Discord.";
+    status.textContent = "❌ Kunde inte kontakta servern.";
+    console.error(err);
+  } finally {
+    sendButton.disabled = false;
   }
+});
+
+// 🔒 Logga ut
+logoutButton.addEventListener("click", () => {
+  currentUser = null;
+  enteredPIN = "";
+  deleteCookie("matbotUser");
+
+  pinDisplay.textContent = "____";
+  loginStatus.textContent = "";
+  messageInput.value = "";
+  status.textContent = "";
+  forgotText.style.display = "none";
+  document.querySelectorAll(".time-options button").forEach(b => b.classList.remove("selected"));
+
+  loginScreen.style.display = "flex";
+  messageScreen.style.display = "none";
+});
+
+// 🔐 "Glömt kod"
+document.getElementById("forgotCode").addEventListener("click", () => {
+  forgotText.style.display = "block";
 });
