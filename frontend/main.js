@@ -1,15 +1,10 @@
-// 🔐 Giltiga användare
 const users = {
-  "1234": "Mamma",
-  "5678": "Pappa",
-  "2468": "Albin",
-  "1111": "Jobbarkompisen",
-  "2222": "Son till jobbarkompis"
+  "1234": "gunnlevs",
+  "5678": "Familj2"
 };
 
 const webhookURL = "https://matbot-1.onrender.com/send";
 
-// 👉 Element
 const pinDisplay = document.getElementById("pinDisplay");
 const loginStatus = document.getElementById("loginStatus");
 const loginScreen = document.getElementById("loginScreen");
@@ -21,7 +16,6 @@ const sendButton = document.getElementById("sendButton");
 const status = document.getElementById("status");
 const logoutButton = document.getElementById("logoutButton");
 
-// 🍪 Cookie-hantering
 function setCookie(name, value, days) {
   const expires = new Date(Date.now() + days * 86400000).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
@@ -34,12 +28,10 @@ function deleteCookie(name) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 }
 
-// 👉 Inloggningsvariabler
 let enteredPIN = "";
 let currentUser = null;
 let selectedTime = null;
 
-// 🟢 Automatisk inloggning via cookie
 document.addEventListener("DOMContentLoaded", () => {
   const savedUser = getCookie("matbotUser");
   if (savedUser) {
@@ -50,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// 🔢 PIN-inmatning
 document.querySelectorAll(".keypad button").forEach(btn => {
   btn.addEventListener("click", () => {
     const val = btn.textContent;
@@ -60,7 +51,7 @@ document.querySelectorAll(".keypad button").forEach(btn => {
     } else if (val === "✔️") {
       if (users[enteredPIN]) {
         currentUser = users[enteredPIN];
-        setCookie("matbotUser", currentUser, 30); // 🍪 Spara i 30 dagar
+        setCookie("matbotUser", currentUser, 30);
         loginScreen.style.display = "none";
         messageScreen.style.display = "flex";
         loggedInAs.textContent = `Inloggad som: ${currentUser}`;
@@ -68,15 +59,14 @@ document.querySelectorAll(".keypad button").forEach(btn => {
         loginStatus.textContent = "❌ Fel kod. Försök igen.";
         enteredPIN = "";
       }
-    } else if (enteredPIN.length < 4 && /^\d$/.test(val)) {
+    } else if (enteredPIN.length < 6 && /^\d$/.test(val)) {
       enteredPIN += val;
     }
 
-    pinDisplay.textContent = enteredPIN.padEnd(4, "_");
+    pinDisplay.textContent = enteredPIN.padEnd(6, "_");
   });
 });
 
-// ⏰ Välj tid
 document.querySelectorAll('.time-options button').forEach(btn => {
   btn.addEventListener('click', () => {
     selectedTime = btn.getAttribute('data-time');
@@ -85,7 +75,6 @@ document.querySelectorAll('.time-options button').forEach(btn => {
   });
 });
 
-// 📤 Skicka meddelande
 sendButton.addEventListener('click', async () => {
   const message = messageInput.value.trim();
 
@@ -95,7 +84,6 @@ sendButton.addEventListener('click', async () => {
   }
 
   const fullMessage = `${message}, ${selectedTime}, ${currentUser}`;
-  console.log("🔧 Skickar till:", webhookURL);
 
   try {
     sendButton.disabled = true;
@@ -126,13 +114,12 @@ sendButton.addEventListener('click', async () => {
   }
 });
 
-// 🔒 Logga ut
 logoutButton.addEventListener("click", () => {
   currentUser = null;
   enteredPIN = "";
   deleteCookie("matbotUser");
 
-  pinDisplay.textContent = "____";
+  pinDisplay.textContent = "______";
   loginStatus.textContent = "";
   messageInput.value = "";
   status.textContent = "";
@@ -143,7 +130,6 @@ logoutButton.addEventListener("click", () => {
   messageScreen.style.display = "none";
 });
 
-// 🔐 "Glömt kod"
 document.getElementById("forgotCode").addEventListener("click", () => {
   forgotText.style.display = "block";
 });
