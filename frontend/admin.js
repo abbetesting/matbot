@@ -1,14 +1,14 @@
-const adminCode = "9999"; // Vi är redan inloggade som admin
+const BASE_URL = "https://matbot-1.onrender.com";
+const adminCode = "9999"; // Direktinloggad
 
 document.addEventListener("DOMContentLoaded", () => {
   loadMessages();
   loadStats();
 });
 
-// 🚀 Ladda alla meddelanden
 async function loadMessages() {
   try {
-    const res = await fetch(`https://matbot-1.onrender.com/admin/messages?code=${adminCode}`);
+    const res = await fetch(`${BASE_URL}/admin/messages?code=${adminCode}`);
     const data = await res.json();
     const tbody = document.querySelector("#messageTable tbody");
     tbody.innerHTML = "";
@@ -27,7 +27,6 @@ async function loadMessages() {
   }
 }
 
-// ➕ Lägg till en familj
 async function addFamily() {
   const pin = document.getElementById("newPin").value.trim();
   const name = document.getElementById("newName").value.trim();
@@ -39,7 +38,7 @@ async function addFamily() {
   }
 
   try {
-    const res = await fetch("https://matbot-1.onrender.com/admin/families", {
+    const res = await fetch(`${BASE_URL}/admin/families`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pin, name, code: adminCode })
@@ -47,7 +46,7 @@ async function addFamily() {
 
     if (res.ok) {
       status.textContent = "✅ Familj tillagd!";
-      loadStats(); // Uppdatera statistiken
+      loadStats();
     } else {
       status.textContent = "❌ Kunde inte lägga till familjen.";
     }
@@ -57,10 +56,9 @@ async function addFamily() {
   }
 }
 
-// 📊 Ladda statistik
 async function loadStats() {
   try {
-    const res = await fetch(`https://matbot-1.onrender.com/admin/stats?code=${adminCode}`);
+    const res = await fetch(`${BASE_URL}/admin/stats?code=${adminCode}`);
     const stats = await res.json();
     const list = document.getElementById("statsList");
     list.innerHTML = "";
@@ -75,7 +73,6 @@ async function loadStats() {
   }
 }
 
-// 🔍 Visa senaste 5 meddelanden från en viss familj (via PIN)
 async function searchFamily() {
   const pin = document.getElementById("searchPin").value.trim();
   const status = document.getElementById("searchStatus");
@@ -89,7 +86,7 @@ async function searchFamily() {
   }
 
   try {
-    const res = await fetch(`https://matbot-1.onrender.com/admin/family-messages?code=${adminCode}&pin=${pin}`);
+    const res = await fetch(`${BASE_URL}/admin/family-messages?code=${adminCode}&pin=${pin}`);
     const data = await res.json();
 
     if (!res.ok) {
