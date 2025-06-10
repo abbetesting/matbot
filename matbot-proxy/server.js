@@ -36,12 +36,18 @@ function saveMessages(messages) {
 
 // 📨 Skicka meddelande
 app.post('/send', async (req, res) => {
+  console.log("Incoming request body:", req.body); // 🔹 Ny loggning
+
   const { content } = req.body;
   if (!content) return res.status(400).json({ error: '⚠️ Inget meddelande' });
 
-  const match = content.match(/,\s*([^,]+)$/);
-  const family = match ? match[1] : null;
+  // 🔹 Ändrat sätt att extrahera familjen
+  const parts = content.split(",").map(p => p.trim());
+  const family = parts.length >= 3 ? parts[2] : null;
+
   const webhook = process.env[`WEBHOOK_${family}`];
+
+  console.log("Using webhook:", webhook, "for family:", family); // 🔹 Ny loggning
 
   if (!webhook) return res.status(400).json({ error: '❌ Webhook saknas för familj' });
 
