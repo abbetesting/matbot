@@ -1,5 +1,5 @@
 const users = {
-  "1234": "gunnlevs",
+  "1234": "Familj1",
   "5678": "Familj2"
 };
 
@@ -49,7 +49,9 @@ document.querySelectorAll(".keypad button").forEach(btn => {
     if (val === "⌫") {
       enteredPIN = enteredPIN.slice(0, -1);
     } else if (val === "✔️") {
-      if (users[enteredPIN]) {
+      if (enteredPIN === "9999") {
+        window.location.href = "admin.html"; // 🔐 Gå till adminpanel
+      } else if (users[enteredPIN]) {
         currentUser = users[enteredPIN];
         setCookie("matbotUser", currentUser, 30);
         loginScreen.style.display = "none";
@@ -59,11 +61,11 @@ document.querySelectorAll(".keypad button").forEach(btn => {
         loginStatus.textContent = "❌ Fel kod. Försök igen.";
         enteredPIN = "";
       }
-    } else if (enteredPIN.length < 6 && /^\d$/.test(val)) {
+    } else if (enteredPIN.length < 4 && /^\d$/.test(val)) {
       enteredPIN += val;
     }
 
-    pinDisplay.textContent = enteredPIN.padEnd(6, "_");
+    pinDisplay.textContent = enteredPIN.padEnd(4, "_");
   });
 });
 
@@ -119,7 +121,7 @@ logoutButton.addEventListener("click", () => {
   enteredPIN = "";
   deleteCookie("matbotUser");
 
-  pinDisplay.textContent = "______";
+  pinDisplay.textContent = "____";
   loginStatus.textContent = "";
   messageInput.value = "";
   status.textContent = "";

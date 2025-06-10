@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Adminpanel – Matbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 {
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    input, button, select {
+      padding: 10px;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 8px;
+    }
+    .section {
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔒 Adminpanel</h1>
+
+  <div id="loginSection">
+    <p>Ange adminkod:</p>
+    <input type="password" id="adminCodeInput" maxlength="4" inputmode="numeric" placeholder="••••" />
+    <button onclick="login()">Logga in</button>
+    <p id="loginError" style="color: red;"></p>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <p><strong>✅ Inloggad</strong></p>
+
+    <div class="section">
+      <h2>➕ Lägg till familj</h2>
+      <input type="text" id="newPin" placeholder="PIN (t.ex. 4321)" />
+      <input type="text" id="newName" placeholder="Familjenamn (t.ex. Familj3)" />
+      <button onclick="addFamily()">Lägg till</button>
+      <p id="addStatus"></p>
+    </div>
+
+    <div class="section">
+      <h2>📄 Alla meddelanden</h2>
+      <table id="messageTable">
+        <thead>
+          <tr>
+            <th>Tid</th>
+            <th>Meddelande</th>
+            <th>Familj</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>📊 Statistik</h2>
+      <ul id="statsList"></ul>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
