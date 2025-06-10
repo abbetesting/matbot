@@ -1,13 +1,12 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 const ADMIN_CODE = process.env.ADMIN_CODE || '9999';
 
 const families = {
@@ -15,9 +14,27 @@ const families = {
   "5678": "Familj2"
 };
 
-let messages = [];
+// 📁 Filväg – Render tillåter bara skrivning till /tmp
+const MESSAGES_FILE = path.join('/tmp', 'messages.json');
 
-// 📨 POST /send
+app.use(cors());
+app.use(express.json());
+
+// 🧾 Hjälpfunktioner
+function readMessages() {
+  try {
+    const data = fs.readFileSync(MESSAGES_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+function saveMessages(messages) {
+  fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2));
+}
+
+// 📨 Skicka meddelande
 app.post('/send', async (req, res) => {
   const { content } = req.body;
   if (!content) return res.status(400).json({ error: '⚠️ Inget meddelande' });
@@ -36,60 +53,73 @@ app.post('/send', async (req, res) => {
     });
 
     if (response.status === 429) {
-      const retryAfter = response.headers.get('retry-after');
-      return res.status(429).json({ error: `🚫 Rate limit. Vänta ${retryAfter} sekunder.` });
+      const retry = response.headers.get('retry-after') || '?';
+      return res.status(429).json({ error: `⏳ Vänta ${retry} sekunder` });
     }
 
-    if (!response.ok) throw new Error(`Discord fel: ${response.status}`);
+    if (!response.ok) throw new Error(`❌ Discord svarade med ${response.status}`);
 
+    const messages = readMessages();
     messages.push({ content, family, timestamp: new Date().toISOString() });
+    saveMessages(messages);
 
-    res.status(200).json({ message: '✅ Skickat' });
+    res.status(200).json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: '❌ Discord-fel' });
+    res.status(500).json({ error: '❌ Fel vid skickande' });
   }
 });
 
-// 🔐 POST /admin/login
+// 🔐 Admin-login
 app.post('/admin/login', (req, res) => {
   const { code } = req.body;
-  if (code === ADMIN_CODE) return res.status(200).json({ success: true });
-  return res.status(401).json({ error: '❌ Fel adminkod' });
+  if (code === ADMIN_CODE) return res.sendStatus(200);
+  res.status(401).json({ error: 'Fel kod' });
 });
 
-// 📄 GET /admin/messages
+// 📄 Hämta alla meddelanden
 app.get('/admin/messages', (req, res) => {
-  const { code } = req.query;
-  if (code !== ADMIN_CODE) return res.status(403).json({ error: '⛔ Otillåtet' });
-  res.json(messages);
+  if (req.query.code !== ADMIN_CODE) return res.status(403).json({ error: '⛔ Otillåtet' });
+  res.json(readMessages());
 });
 
-// ➕ POST /admin/families
+// ➕ Lägg till familj
 app.post('/admin/families', (req, res) => {
   const { pin, name, code } = req.body;
   if (code !== ADMIN_CODE) return res.status(403).json({ error: '⛔ Otillåtet' });
-
-  if (!pin || !name) return res.status(400).json({ error: '⚠️ Inget namn eller kod' });
+  if (!pin || !name) return res.status(400).json({ error: '⚠️ Ange PIN och namn' });
 
   families[pin] = name;
-  res.json({ message: '✅ Familj tillagd' });
+  res.json({ success: true });
 });
 
-// 📊 GET /admin/stats
+// 📊 Statistik
 app.get('/admin/stats', (req, res) => {
-  const { code } = req.query;
-  if (code !== ADMIN_CODE) return res.status(403).json({ error: '⛔ Otillåtet' });
+  if (req.query.code !== ADMIN_CODE) return res.status(403).json({ error: '⛔ Otillåtet' });
 
   const stats = {};
-  messages.forEach(msg => {
-    if (!stats[msg.family]) stats[msg.family] = 0;
-    stats[msg.family]++;
-  });
-
+  for (const msg of readMessages()) {
+    stats[msg.family] = (stats[msg.family] || 0) + 1;
+  }
   res.json(stats);
 });
 
+// 🔍 Sök senaste 5 för PIN
+app.get('/admin/family-messages', (req, res) => {
+  const { code, pin } = req.query;
+  if (code !== ADMIN_CODE) return res.status(403).json({ error: '⛔ Otillåtet' });
+
+  const family = families[pin];
+  if (!family) return res.status(404).json({ error: '❌ Ingen familj med den PIN' });
+
+  const filtered = readMessages()
+    .filter(m => m.family === family)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, 5);
+
+  res.json({ family, messages: filtered });
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 Kör på port ${PORT}`);
+  console.log(`🚀 Server kör på port ${PORT}`);
 });
